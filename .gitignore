@@ -1,11 +1,62 @@
+# Dependencies
 node_modules/
+frontend/node_modules/
+
+# Environment variables
 .env
-backend.log
-dist/
-build/
-.DS_Store
-*.local
+.env.local
+.env.production
+
+# Logs
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.qoder/
+pm2-*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+.nyc_output/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/
+frontend/dist/
+frontend/build/
+
+# Uploads (if storing locally)
+uploads/
+temp/
+
+# Database
+*.sqlite
+*.db
+
+# Testing
+.jest/
+
+# Redis dump
+dump.rdb
+
+# Misc
+*.bak
+*.tmp
+.cache/

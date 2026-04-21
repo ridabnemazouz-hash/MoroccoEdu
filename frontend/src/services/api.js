@@ -64,6 +64,11 @@ export const getModuleDetail = async (moduleId) => {
 };
 
 // Resources API
+export const getTrendingResources = async (limit = 20, offset = 0) => {
+  const response = await api.get(`/api/resources/trending?limit=${limit}&offset=${offset}`);
+  return response.data;
+};
+
 export const getResourcesByModule = async (moduleId, limit = 50, offset = 0) => {
   const response = await api.get(`/api/modules/${moduleId}/resources?limit=${limit}&offset=${offset}`);
   return response.data;
@@ -102,6 +107,11 @@ export const addReaction = async (resourceId, type) => {
   return response.data;
 };
 
+export const deleteComment = async (commentId) => {
+  const response = await api.delete(`/api/resources/comments/${commentId}`);
+  return response.data;
+};
+
 export const removeReaction = async (resourceId) => {
   const response = await api.delete(`/api/resources/${resourceId}/reactions`);
   return response.data;
@@ -109,6 +119,39 @@ export const removeReaction = async (resourceId) => {
 
 export const trackView = async (resourceId) => {
   const response = await api.post(`/api/resources/${resourceId}/views`);
+  return response.data;
+};
+
+// Reviews API
+export const getSchoolReviews = async (schoolId, limit = 10, offset = 0) => {
+  const response = await api.get(`/api/reviews/${schoolId}?limit=${limit}&offset=${offset}`);
+  return response.data;
+};
+
+export const addReview = async (schoolId, rating, comment) => {
+  const response = await api.post(`/api/reviews/${schoolId}`, { rating, comment });
+  return response.data;
+};
+
+export const deleteReview = async (reviewId) => {
+  const response = await api.delete(`/api/reviews/${reviewId}`);
+  return response.data;
+};
+
+// Location API
+export const fetchCountries = async () => {
+  const response = await api.get('/api/locations/countries');
+  return response.data;
+};
+
+export const fetchCitiesByCountry = async (countryId) => {
+  const response = await api.get(`/api/locations/countries/${countryId}/cities`);
+  return response.data;
+};
+
+// Professor API
+export const getProfessorDashboard = async () => {
+  const response = await api.get('/api/professor/dashboard');
   return response.data;
 };
 

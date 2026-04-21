@@ -31,6 +31,40 @@ class Academic {
     return result.insertId;
   }
 
+  // Create field WITH strict mapping validation
+  static async createFieldWithValidation({ schoolId, name, description }) {
+    // 1. Check if school exists and get its type
+    const schools = await query('SELECT short_name, name FROM schools WHERE id = ?', [schoolId]);
+    if (schools.length === 0) return -1; // School not found
+    
+    // 2. Determine type
+    const school = schools[0];
+    const identifier = (school.short_name + ' ' + school.name).toUpperCase();
+    const fieldNameUpper = name.toUpperCase();
+    
+    // Strict Validation Rules:
+    if (identifier.includes('ENSA') && (fieldNameUpper.includes('DROIT') || fieldNameUpper.includes('LAW') || fieldNameUpper.includes('MEDECINE'))) {
+      return -2; // Invalid mapping
+    }
+    if (identifier.includes('FSJES') && (fieldNameUpper.includes('INGENIERIE') || fieldNameUpper.includes('ENGINEERING') || fieldNameUpper.includes('GENIE'))) {
+      return -2; // Invalid mapping
+    }
+    if (identifier.includes('ESEF') && (fieldNameUpper.includes('MEDECINE') || fieldNameUpper.includes('GENIE') || fieldNameUpper.includes('DROIT'))) {
+      return -2; // Invalid mapping
+    }
+
+    // 3. Check for duplicates (even though we have UNIQUE constraint, we check gracefully)
+    const exists = await query('SELECT id FROM fields WHERE school_id = ? AND name = ?', [schoolId, name]);
+    if (exists.length > 0) return -3; // Duplicate field
+
+    // 4. Safe insert
+    const result = await query(
+      'INSERT INTO fields (school_id, name, description) VALUES (?, ?, ?)',
+      [schoolId, name, description]
+    );
+    return result.insertId;
+  }
+
   // Get all semesters for a field
   static async getSemestersByField(fieldId) {
     const semesters = await query(

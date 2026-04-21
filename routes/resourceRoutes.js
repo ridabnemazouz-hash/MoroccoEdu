@@ -3,20 +3,24 @@ const router = express.Router();
 const resourceController = require('../controllers/resourceController');
 const { protect, authorize } = require('../middleware/auth');
 const { singleFile } = require('../middleware/upload');
+const validate = require('../middleware/validate');
+const {
+  uploadResourceSchema,
+  getResourceSchema,
+  getResourcesSchema
+} = require('../middleware/validators/resourceValidator');
 
-// All routes require authentication
-router.use(protect);
+// Get resources for a module (public)
+router.get('/modules/:moduleId/resources', validate(getResourcesSchema), resourceController.getResourcesByModule);
 
-// Upload resource (professor or admin only)
-router.post('/modules/:moduleId/resources', authorize('professor', 'admin'), singleFile, resourceController.uploadResource);
+// Get trending resources (public)
+router.get('/resources/trending', resourceController.getTrendingResources);
 
-// Get resources for a module (public access - move before protected routes)
-router.get('/modules/:moduleId/resources', resourceController.getResourcesByModule);
+// Get single resource (public)
+router.get('/resources/:resourceId', validate(getResourceSchema), resourceController.getResourceDetail);
 
-// Get single resource
-router.get('/resources/:resourceId', resourceController.getResourceDetail);
-
-// Delete resource (owner or admin)
-router.delete('/resources/:resourceId', resourceController.deleteResource);
+// Protected routes below
+router.post('/modules/:moduleId/resources', protect, authorize('professor', 'admin'), validate(uploadResourceSchema), singleFile, resourceController.uploadResource);
+router.delete('/resources/:resourceId', protect, resourceController.deleteResource);
 
 module.exports = router;

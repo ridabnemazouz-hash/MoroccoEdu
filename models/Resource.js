@@ -15,11 +15,28 @@ class Resource {
   static async getResourcesByModule(moduleId, { limit = 50, offset = 0 }) {
     const resources = await query(
       `SELECT r.*, u.name as author_name, u.email as author_email,
-              (SELECT COUNT(*) FROM reactions WHERE resource_id = r.id AND type = 'like') as likes,
-              (SELECT COUNT(*) FROM reactions WHERE resource_id = r.id AND type = 'dislike') as dislikes,
-              (SELECT COUNT(*) FROM comments WHERE resource_id = r.id) as comment_count
+              COALESCE(like_count.likes, 0) as likes,
+              COALESCE(dislike_count.dislikes, 0) as dislikes,
+              COALESCE(comment_count.comments, 0) as comment_count
        FROM resources r
        JOIN users u ON r.user_id = u.id
+       LEFT JOIN (
+         SELECT resource_id, COUNT(*) as likes 
+         FROM reactions 
+         WHERE type = 'like' 
+         GROUP BY resource_id
+       ) like_count ON r.id = like_count.resource_id
+       LEFT JOIN (
+         SELECT resource_id, COUNT(*) as dislikes 
+         FROM reactions 
+         WHERE type = 'dislike' 
+         GROUP BY resource_id
+       ) dislike_count ON r.id = dislike_count.resource_id
+       LEFT JOIN (
+         SELECT resource_id, COUNT(*) as comments 
+         FROM comments 
+         GROUP BY resource_id
+       ) comment_count ON r.id = comment_count.resource_id
        WHERE r.module_id = ?
        ORDER BY r.created_at DESC
        LIMIT ? OFFSET ?`,
@@ -36,15 +53,77 @@ class Resource {
     };
   }
 
+  // Get trending resources (globally sorted by views + likes)
+  static async getTrendingResources({ limit = 20, offset = 0 } = {}) {
+    const resources = await query(
+      `SELECT r.*, u.name as author_name, m.name as module_name, s.name as school_name,
+              COALESCE(like_count.likes, 0) as likes,
+              COALESCE(dislike_count.dislikes, 0) as dislikes,
+              COALESCE(comment_count.comments, 0) as comment_count
+       FROM resources r
+       JOIN users u ON r.user_id = u.id
+       JOIN modules m ON r.module_id = m.id
+       JOIN semesters sem ON m.semester_id = sem.id
+       JOIN fields f ON sem.field_id = f.id
+       JOIN schools s ON f.school_id = s.id
+       LEFT JOIN (
+         SELECT resource_id, COUNT(*) as likes 
+         FROM reactions 
+         WHERE type = 'like' 
+         GROUP BY resource_id
+       ) like_count ON r.id = like_count.resource_id
+       LEFT JOIN (
+         SELECT resource_id, COUNT(*) as dislikes 
+         FROM reactions 
+         WHERE type = 'dislike' 
+         GROUP BY resource_id
+       ) dislike_count ON r.id = dislike_count.resource_id
+       LEFT JOIN (
+         SELECT resource_id, COUNT(*) as comments 
+         FROM comments 
+         GROUP BY resource_id
+       ) comment_count ON r.id = comment_count.resource_id
+       ORDER BY (r.views + COALESCE(like_count.likes, 0) * 2) DESC, r.created_at DESC
+       LIMIT ? OFFSET ?`,
+      [limit, offset]
+    );
+
+    const countRes = await query('SELECT COUNT(*) as total FROM resources');
+    
+    return {
+      data: resources,
+      total: countRes[0].total,
+      limit,
+      offset
+    };
+  }
+
   // Get resource by ID
   static async getResourceById(id) {
     const resources = await query(
       `SELECT r.*, u.name as author_name, u.email as author_email,
-              (SELECT COUNT(*) FROM reactions WHERE resource_id = r.id AND type = 'like') as likes,
-              (SELECT COUNT(*) FROM reactions WHERE resource_id = r.id AND type = 'dislike') as dislikes,
-              (SELECT COUNT(*) FROM comments WHERE resource_id = r.id) as comment_count
+              COALESCE(like_count.likes, 0) as likes,
+              COALESCE(dislike_count.dislikes, 0) as dislikes,
+              COALESCE(comment_count.comments, 0) as comment_count
        FROM resources r
        JOIN users u ON r.user_id = u.id
+       LEFT JOIN (
+         SELECT resource_id, COUNT(*) as likes 
+         FROM reactions 
+         WHERE type = 'like' 
+         GROUP BY resource_id
+       ) like_count ON r.id = like_count.resource_id
+       LEFT JOIN (
+         SELECT resource_id, COUNT(*) as dislikes 
+         FROM reactions 
+         WHERE type = 'dislike' 
+         GROUP BY resource_id
+       ) dislike_count ON r.id = dislike_count.resource_id
+       LEFT JOIN (
+         SELECT resource_id, COUNT(*) as comments 
+         FROM comments 
+         GROUP BY resource_id
+       ) comment_count ON r.id = comment_count.resource_id
        WHERE r.id = ?`,
       [id]
     );

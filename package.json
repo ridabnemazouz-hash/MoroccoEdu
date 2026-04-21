@@ -4,7 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "jest --detectOpenHandles --forceExit",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "db:migrate:indexes": "node scripts/add_performance_indexes.js",
+    "db:migrate:additional-indexes": "node scripts/add_additional_indexes.js",
+    "db:migrate:refresh-tokens": "node scripts/add_refresh_tokens_table.js",
+    "db:migrate:all": "npm run db:migrate:refresh-tokens && npm run db:migrate:indexes && npm run db:migrate:additional-indexes"
   },
   "keywords": [],
   "author": "",
@@ -13,13 +21,26 @@
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.9.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.3.2",
     "express-validator": "^7.3.2",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.10.1",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
     "multer": "^2.1.1",
-    "mysql2": "^3.22.1"
+    "mysql2": "^3.22.1",
+    "passport": "^0.7.0",
+    "passport-facebook": "^3.0.0",
+    "passport-google-oauth20": "^2.0.0",
+    "winston": "^3.19.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "jest": "^30.3.0",
+    "supertest": "^7.2.2"
   }
 }

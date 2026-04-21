@@ -22,6 +22,42 @@ exports.getFieldsBySchool = async (req, res) => {
   }
 };
 
+// @desc    Add a field to a school (Admin only)
+// @route   POST /api/schools/:schoolId/fields
+// @access  Private/Admin
+exports.addField = async (req, res) => {
+  try {
+    const { schoolId } = req.params;
+    const { name, description } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ success: false, message: 'Field name is required' });
+    }
+
+    // Call the model function which will handle validation and insertion
+    const fieldId = await Academic.createFieldWithValidation({ schoolId, name, description });
+    
+    if (fieldId === -1) {
+       return res.status(404).json({ success: false, message: 'School not found' });
+    } else if (fieldId === -2) {
+       return res.status(400).json({ success: false, message: 'Invalid field mapping for this school type' });
+    } else if (fieldId === -3) {
+       return res.status(400).json({ success: false, message: 'Field already exists in this school' });
+    }
+
+    res.status(201).json({
+      success: true,
+      data: { id: fieldId, school_id: schoolId, name, description }
+    });
+  } catch (error) {
+    console.error('Add field error:', error);
+    if (error.code === 'ER_DUP_ENTRY') {
+       return res.status(400).json({ success: false, message: 'Field already exists' });
+    }
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
 // @desc    Get all semesters for a field
 // @route   GET /api/fields/:fieldId/semesters
 // @access  Public

@@ -26,6 +26,10 @@ const Login = () => {
     }
   };
 
+  const handleSocialLogin = (provider) => {
+    window.location.href = `http://localhost:5000/api/auth/${provider}`;
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -89,12 +93,56 @@ const Login = () => {
               color: 'white',
               fontWeight: 700,
               fontSize: '1rem',
-              cursor: loading ? 'not-allowed' : 'pointer'
+              cursor: loading ? 'not-allowed' : 'pointer',
+              marginBottom: '1rem'
             }}
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
+
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+          <button
+            onClick={() => handleSocialLogin('google')}
+            style={{
+              flex: 1,
+              padding: '0.75rem',
+              borderRadius: '12px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.05)',
+              color: 'inherit',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              fontWeight: 600
+            }}
+          >
+            <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" alt="Google" width="20" />
+            Google
+          </button>
+          <button
+            onClick={() => handleSocialLogin('facebook')}
+            style={{
+              flex: 1,
+              padding: '0.75rem',
+              borderRadius: '12px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.05)',
+              color: 'inherit',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              fontWeight: 600
+            }}
+          >
+            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/2021_Facebook_icon.svg" alt="Facebook" width="20" />
+            Facebook
+          </button>
+        </div>
 
         <p style={{ textAlign: 'center', marginTop: '2rem', opacity: 0.7 }}>
           Don't have an account? <Link to="/register" style={{ color: 'var(--accent-color)' }}>Sign up</Link>

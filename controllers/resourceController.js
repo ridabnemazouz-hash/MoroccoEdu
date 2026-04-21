@@ -86,6 +86,32 @@ exports.getResourcesByModule = async (req, res) => {
   }
 };
 
+// @desc    Get trending resources globally
+// @route   GET /api/resources/trending
+// @access  Public
+exports.getTrendingResources = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = parseInt(req.query.offset) || 0;
+
+    const result = await Resource.getTrendingResources({ limit, offset });
+
+    res.json({
+      success: true,
+      data: result.data,
+      total: result.total,
+      limit,
+      offset
+    });
+  } catch (error) {
+    console.error('Get trending resources error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
+
 // @desc    Get single resource details
 // @route   GET /api/resources/:resourceId
 // @access  Public
